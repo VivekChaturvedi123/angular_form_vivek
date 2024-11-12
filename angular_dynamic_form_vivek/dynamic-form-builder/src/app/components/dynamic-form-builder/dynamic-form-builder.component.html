@@ -1,0 +1,105 @@
+<div>
+  <form [formGroup]="fieldOptionsForm">
+    <div class="form-group">
+      <label for="type">Field Type</label>
+      <select id="type" formControlName="type" (change)="onFieldTypeChange($event)" class="form-control">
+        <option value="text">Text</option>
+        <option value="textarea">Text Area</option>
+        <option value="dropdown">Dropdown</option>
+        <option value="checkbox">Checkbox</option>
+        <option value="radio">Radio</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="label">Label</label>
+      <input id="label" formControlName="label" class="form-control" />
+    </div>
+
+
+    <div *ngIf="isFieldTypeTextOrTextarea()" class="form-group">
+      <label for="placeholder">Placeholder</label>
+      <input id="placeholder" formControlName="placeholder" class="form-control" />
+    </div>
+
+    <div *ngIf="isFieldTypeDropdownOrCheckbox()">
+      <div class="form-group">
+        <label for="options">Options (Comma separated)</label>
+        <input id="options" formControlName="options" class="form-control" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="isRequired">Required</label>
+      <input type="checkbox" id="isRequired" formControlName="isRequired" />
+    </div>
+
+    <div formArrayName="validations">
+      <div *ngFor="let validation of validations.controls; let i = index" [formGroupName]="i">
+        <div class="form-group">
+          <label>Validation</label>
+          <select formControlName="type" class="form-control">
+            <option value="minLength">Min Length</option>
+            <option value="maxLength">Max Length</option>
+            <option value="pattern">Pattern</option>
+          </select>
+          <input formControlName="value" class="form-control" placeholder="Validation Value" />
+          <button type="button" (click)="removeValidation(i)">Remove</button>
+        </div>
+      </div>
+    </div>
+
+  
+
+
+
+
+
+
+
+    
+    <div *ngIf="!isValidationDisabled()">
+      <button type="button" (click)="addValidation()">Add Validation</button>
+    </div>
+
+    <button type="button" (click)="addField()">Add Field</button>
+  </form>
+
+  <form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()">
+    <div *ngFor="let field of fields; let i = index">
+      <div class="form-group">
+        <label>{{ field.label }}</label>
+        <div *ngIf="field.type === 'text' || field.type === 'textarea'">
+          <input *ngIf="field.type === 'text'" [formControlName]="field.label" class="form-control" [placeholder]="field.placeholder" />
+          <textarea *ngIf="field.type === 'textarea'" [formControlName]="field.label" class="form-control" [placeholder]="field.placeholder"></textarea>
+        </div>
+
+        <div *ngIf="field.type === 'dropdown'">
+          <select [formControlName]="field.label" class="form-control">
+            <option *ngFor="let option of field.options" [value]="option">{{ option }}</option>
+          </select>
+        </div>
+
+        <div *ngIf="field.type === 'checkbox'">
+          <div *ngFor="let option of field.options; let j = index">
+            <input type="checkbox" [formControlName]="field.label" (change)="onCheckboxChange(field, j, $event)" /> {{ option }}
+          </div>
+        </div>
+
+        <div *ngIf="field.type === 'radio'">
+          <div *ngFor="let option of field.options; let j = index">
+            <input type="radio" [formControlName]="field.label" [value]="option" /> {{ option }}
+          </div>
+        </div>
+
+        <div *ngIf="isFieldInvalid(field.label)" class="error">
+          {{ getErrorMessage(field) }}
+        </div>
+      </div>
+
+      <button type="button" (click)="removeField(i)">Remove Field</button>
+    </div>
+
+    <button type="submit" [disabled]="!dynamicForm.valid">Submit</button>
+  </form>
+</div>
